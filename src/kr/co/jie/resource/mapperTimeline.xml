@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie.timeline">
+  	<!-- All Timeline Sql -->
+	<sql id="timelineAllCol"> timeline_no, jobseeker_no, timeline_writer,
+		timeline_content, timeline_date, timeline_image, timeline_authority,
+		timeline_recommend, hireboard_no, timeline_comment_no
+	</sql>
+
+	<!-- myTimeline -->
+	<select id="myTimelineList" parameterType="timelineDTO"
+		resultType="timelineDTO"> 
+		select <include refid="timelineAllCol" />
+		from timeline
+		where jobseeker_no = #{jobseeker_no}
+		order by timeline_date desc
+	</select>
+
+	<insert id="myTimelineWrite" parameterType="timelineDTO"> 
+		insert into timeline(timeline_no, jobseeker_no, timeline_writer,
+		timeline_content, timeline_date)
+		
+		values(timeline_no_seq.nextval, #{jobseeker_no}, #{timeline_writer}, #{timeline_content},
+				sysdate)
+	</insert>
+	
+	<update id="myTimelineModifyOk" parameterType="timelineDTO">
+		update timeline
+		set timeline_content=#{timeline_content}, timeline_date=sysdate
+		where timeline_no=#{timeline_no}
+	</update>
+	
+	<delete id="timelineDelete" parameterType="int">
+		delete from timeline
+		where timeline_no=#{timeline_no}
+	</delete>
+  </mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie.company">
+  	
+  	<!-- Company 컬럼 -->
+  	<sql id="allColumn" >
+  		company_no,
+  		company_id,
+  		company_pw,
+  		company_name,
+  		company_sort,
+  		company_email,
+  		company_tel,
+  		company_addr,
+  		company_number_employee,
+  		company_establish_date,
+  		company_sales,
+  		company_image,
+  		member_type,
+  		company_homepage
+  	</sql>
+  	
+  	<select id="companySelectByNo" parameterType="comDTO" resultType="comDTO">
+  		SELECT <include refid="allColumn" />
+  		FROM COMPANY
+  		WHERE company_no = #{company_no}
+  	</select>
+  	
+  	<!-- 전체 목록 수 -->
+  	<select id="getTotal" resultType="int" parameterType="String">
+  		SELECT count(*) cnt
+  		FROM COMPANY
+  		WHERE company_name like '%'||#{keyword}||'%'
+  	</select>
+  	
+  	<!-- 키워드로 검색 -->
+  	<select id="companySelectByKeyword" resultType="companyDTO" parameterType="se">
+  		select rn, <include refid="allColumn" /> 
+  		from (select rownum rn, <include refid="allColumn" /> 
+  			from (select <include refid="allColumn" />
+  					from (select <include refid="allColumn" /> 
+  						from company
+  						order by company_name desc)
+	  				where   company_name like '%'||#{keyword}||'%')
+  			where rownum &lt;= #{end}) 
+  		where rn &gt;= #{start}
+  	</select>
+  </mapper>

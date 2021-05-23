@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie">
+  
+  	<select id="selectResume"  parameterType="int" resultType="resumeDTO">
+	SELECT r.resume_no, resume_title, jobseeker_name,
+				jobseeker_gender, jobseeker_bday,
+				jobseeker_tel, jobseeker_cell,
+				<!-- jobseeker_email --> jobseeker_addr,
+				jobseeker_interested, jobseeker_wanted,
+				jobseeker_image, resume_career_companyname,
+				resume_career_jobcontent, resume_edu_name,
+				resume_edu_period, resume_edu_major,
+				resume_edu_graduation, resume_edu_score,
+				resume_cv_title1, resume_cv_title2,
+				resume_cv_title3, resume_cv_title4,
+				resume_cv_title5, resume_cv_content1,
+				resume_cv_content2, resume_cv_content3,
+				resume_cv_content4, resume_cv_content5,
+				resume_career_status, resume_career_period
+	FROM RESUME R, JOBSEEKER J, RESUME_CV CV, RESUME_CAREER RC, RESUME_EDU RE
+	WHERE R.JOBSEEKER_NO = J.JOBSEEKER_NO AND
+	      CV.RESUME_NO = R.RESUME_NO AND
+	      RC.RESUME_NO = R.RESUME_NO AND
+	      RE.RESUME_NO = R.RESUME_NO AND
+	      R.RESUME_NO = #{resumeNo}
+	</select>
+	
+	<insert id="resumeInsertOne1" parameterType="dto">
+	INSERT INTO resume_cv 
+	VALUES(#{resume_no}, #{resume_cv_title1}, #{resume_cv_content1}, #{resume_cv_title2}, #{resume_cv_content2},
+		#{resume_cv_title3}, #{resume_cv_content3}, #{resume_cv_title4}, #{resume_cv_content4},
+		 #{resume_cv_title5}, #{resume_cv_content5}, #{resume_no})
+	</insert>
+  
+  <insert id="resumeInsertOne2" parameterType="dto">
+  INSERT INTO resume_career 
+	VALUES(#{resume_no}, #{resume_career_companyname}, #{resume_career_jobcontent}, #{resume_career_period}, #{resume_no}, #{resume_career_status})
+  </insert>
+  
+  <insert id="resumeInsertOne3" parameterType="dto">
+  INSERT INTO resume 
+	VALUES ((SELECT jobseeker_no
+        FROM jobseeker
+        WHERE jobseeker_email ='ijang@naver.com'),
+        #{resume_no},
+        #{resume_no},
+        #{resume_no},
+        #{resume_no},
+        #{resume_title}
+)
+  </insert>
+  
+    <insert id="resumeInsertOne4" parameterType="dto">
+  INSERT INTO resume_edu 
+	VALUES(#{resume_no}, #{resume_edu_name}, #{resume_edu_period}, 
+			#{resume_edu_major}, #{resume_edu_graduation},  #{resume_edu_score}, #{resume_no})
+  </insert>
+  
+  <update id="jobseekerUpdate" parameterType="dto">
+	UPDATE jobseeker
+	SET jobseeker_name=#{jobseeker_name},
+	    jobseeker_gender=#{jobseeker_gender},
+	    jobseeker_bday=#{jobseeker_bday},
+	    jobseeker_tel=#{jobseeker_tel},
+	    jobseeker_cell=#{jobseeker_cell},
+	    jobseeker_email='ijang@naver.com',
+	    jobseeker_addr=#{jobseeker_addr},
+	    jobseeker_interested=#{jobseeker_interested},
+	    jobseeker_wanted=#{jobseeker_wanted},
+	    jobseeker_image=#{jobseeker_image}
+	WHERE jobseeker_email='ijang@naver.com'
+  </update>
+  
+  </mapper>

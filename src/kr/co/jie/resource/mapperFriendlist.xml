@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  
+  <mapper namespace="kr.co.jie.friendlist">
+  	<sql id="allColume">
+  		friendlist_no,
+  		jobseeker_no,
+  		friendlist_subno,
+  		friendlist_date,
+  		friendlist_type,
+  		friendlist_name,
+  		friendlist_email
+  	</sql>
+  	<insert id="addFriend" parameterType="friendlistDTO">
+  		insert into friendlist(friendlist_no,jobseeker_no,friendlist_subno,friendlist_date,friendlist_type,friendlist_name,friendlist_email)
+  		values(friendlist_no_seq.nextval, #{jobseeker_no}, #{friendlist_subno},sysdate,1,#{friendlist_name},#{friendlist_email})
+  	</insert>
+  	<select id="viewmyfriend" resultType="friendlistDTO" parameterType="int">
+  		select friendlist_name, friendlist_email, friendlist_subno 
+  		from friendlist 
+  		where jobseeker_no = #{jobseeker_no}
+  	</select>
+  	<delete id="deleteFriend" parameterType="int">
+  		delete from friendlist
+  		where friendlist_subno = #{friendlist_subno}
+  	</delete>
+  </mapper>

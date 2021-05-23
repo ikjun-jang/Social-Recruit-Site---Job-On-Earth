@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.jie">
+
+	<!-- Jobseeker_Member Sql -->
+	<sql id="jobAllCol">
+		jobseeker_no,jobseeker_id,jobseeker_pw,jobseeker_name,jobseeker_gender,
+		jobseeker_bday,jobseeker_tel,jobseeker_cell,jobseeker_email,jobseeker_addr,
+		jobseeker_interested,jobseeker_wanted,jobseeker_image,member_type
+	</sql>
+
+	<insert id="jobSignUp" parameterType="jobDTO"> 
+		insert into jobseeker(jobseeker_no, jobseeker_email, jobseeker_pw, jobseeker_name, member_type)
+		values(jobseeker_no_seq.nextval, #{jobseeker_email}, #{jobseeker_pw},
+		#{jobseeker_name}, #{member_type})
+	</insert>
+
+	<select id="jobLoginOk" parameterType="jobDTO" resultType="jobDTO">
+		select
+		<include refid="jobAllCol" />
+		from jobseeker where jobseeker_email = #{jobseeker_email} AND
+		jobseeker_pw = #{jobseeker_pw}
+	</select>
+
+	<!-- Company_Member Sql -->
+	<sql id="comAllCol">
+		company_no,company_id,company_pw,company_name,company_sort,company_email,
+		company_tel,company_addr,company_number_employee,company_establish_date,
+		company_sales,company_image,member_type
+	</sql>
+
+	<select id="comLoginOk" parameterType="comDTO" resultType="comDTO">
+		SELECT <include refid="comAllCol" />
+		FROM company 
+		WHERE company_email = #{company_email} AND company_pw = #{company_pw}
+	</select>
+
+	<insert id="comSignUp" parameterType="comDTO"> insert into
+		company(company_no, company_email, company_pw, company_name, member_type)
+		values(company_no_seq.nextval, #{company_email}, #{company_pw},
+		#{company_name}, #{member_type})
+	</insert>
+
+	
+
+	<delete id="deleteApply" parameterType="int"> DELETE FROM applylist
+		WHERE applylist_no = #{applyNo}
+	</delete>
+
+	<delete id="deleteScrap" parameterType="int"> DELETE FROM scrap WHERE
+		scrap_no = #{scrapNo}
+	</delete>
+	
+	<insert id="scrapInsertOne">
+		INSERT INTO scrap VALUES(
+		scrap_no_seq.nextval,		<!-- 스크랩 번호 -->
+		#{hireboard_no},			<!-- 게시판 번호 -->
+		#{jobseeker_no}				<!-- 내 번호 -->
+		)
+	</insert>
+	
+	<insert id="applyListInsertOne">
+		INSERT INTO applylist VALUES(
+		applylist_no_seq.nextval,
+		#{company_no},
+		#{jobseeker_no},
+		#{hireboard_no},
+		1,
+		sysdate
+		)
+	</insert>
+
+	<delete id="deleteResume" parameterType="int"> DELETE FROM resume
+		WHERE resume_no = #{resumeNo}
+	</delete>
+
+	<select id="getApplyTotal" resultType="int">
+		SELECT count(*)
+		FROM applylist
+	</select>
+
+	<select id="getScrapTotal" resultType="int"> SELECT count(*) FROM
+		scrap
+	</select>
+
+	<select id="getResumeTotal" resultType="int"> SELECT count(*) FROM
+		resume
+	</select>
+
+	<select id="applyListSelectAll" parameterType="se" resultType="applyListDTO">
+		select rn, applylist_no, company_no, jobseeker_no, hireboard_no, applylist_type, apply_date, 
+  								jobseeker_name, company_name, hireboard_title
+		
+  		from (select rownum rn, applylist_no, company_no, jobseeker_no, hireboard_no, applylist_type, apply_date, 
+  								jobseeker_name, company_name, hireboard_title 
+  			from (select applylist_no, company_no, jobseeker_no, hireboard_no, applylist_type, apply_date,
+  								jobseeker_name, company_name, hireboard_title
+  					from (select a.applylist_no, c.company_no, j.jobseeker_no, h.hireboard_no, a.applylist_type, a.apply_date, 
+  								j.jobseeker_name, c.company_name, h.hireboard_title
+  						from hireboard h, applylist a, company c, jobseeker j
+  						where a.hireboard_no = h.hireboard_no and
+  							  a.company_no = c.company_no and
+  							  j.jobseeker_no = a.jobseeker_no
+  						order by hireboard_no desc))
+  			where rownum &lt;= #{end}) 
+  		where rn &gt;= #{start}
+	</select>
+
+	<!-- <select id="scrapSelectAll" parameterType="se" resultType="scrapDTO">
+		SELECT s.scrap_no, h.company_name, h.hireboard_title, h.hireboard_deadline, s.hireboard_no, s.jobseeker_no
+		FROM (SELECT s.scrap_no, h.company_name, h.hireboard_title,
+		h.hireboard_deadline, s.hireboard_no, s.jobseeker_no
+		FROM(SELECT s.ROWNUM RN, s.scrap_no, h.company_name, h.hireboard_title,
+		h.hireboard_deadline, s.hireboard_no, s.jobseeker_no
+		FROM (SELECT s.scrap_no, h.company_name, h.hireboard_title,
+		h.hireboard_deadline, s.hireboard_no, s.jobseeker_no
+		FROM scrap s, hireboard h
+		WHERE s.hireboard_no = h.hireboard_no and
+		WHERE ROWNUM &lt;= #{end})
+		WHERE RN &gt;= #{start})
+	</select> -->
+	
+	<select id="scrapSelectAll" resultType="scrapDTO" parameterType="se">
+  		select rn, scrap_no, company_name, hireboard_title, hireboard_deadline, hireboard_no, jobseeker_no
+  		from (select rownum rn, scrap_no, company_name, hireboard_title, hireboard_deadline, hireboard_no, jobseeker_no 
+  			from (select scrap_no, company_name, hireboard_title, hireboard_deadline, hireboard_no, jobseeker_no
+  					from (select s.scrap_no, c.company_name, h.hireboard_title, h.hireboard_deadline, s.hireboard_no, s.jobseeker_no 
+  						from hireboard h, scrap s, company c
+  						where h.hireboard_no = s.hireboard_no and
+  							  h.company_no = c.company_no
+  						order by hireboard_no desc))
+  			where rownum &lt;= #{end}) 
+  		where rn &gt;= #{start}
+  	</select>
+
+	<select id="resumeSelectAll" parameterType="se" resultType="resumeListDTO">
+		SELECT resume_no, resume_title, jobseeker_interested, jobseeker_wanted
+		FROM (SELECT resume_no, resume_title, jobseeker_interested,
+		jobseeker_wanted
+		FROM(SELECT ROWNUM RN, resume_no, resume_title, jobseeker_interested,
+		jobseeker_wanted
+		FROM (SELECT r.resume_no, r.resume_title, j.jobseeker_interested,
+		j.jobseeker_wanted
+		FROM resume r, jobseeker j
+		WHERE j.jobseeker_no = r.jobseeker_no and
+		j.jobseeker_email = 'ijang@naver.com')
+		WHERE ROWNUM &lt;= #{end})
+		WHERE RN &gt;= #{start})
+	</select>
+</mapper>

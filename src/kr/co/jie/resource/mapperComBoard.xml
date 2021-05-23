@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace=" ">
+	<!-- 커뮤니티 테이블 전체컬럼 -->
+	<sql id="cafe_allcolmn">
+		B_NO,B_WRITER,B_TITLE,B_CONTENT,B_IMAGE,
+		B_DATE,B_HIT, B_STATUS,
+		B_RECOM, B_PERMISSION, CAFE_NAME, CAFE_B_NO
+	</sql>
+	<!-- 카페 테이블 전체컬럼 -->
+	<sql id="com_allcolmn">
+		cafe_name , cafe_addr, cafe_sort1, cafe_sort2,
+		cafe_keyword,
+		cafe_img, cafe_born_date, jobseeker_no ,member_count
+	</sql>
+		<!-- cafe_member_count, cafe_member_nick,cafe_member_date , cafe_member_grade -->
+
+	<!-- 1,2번 동시작용 -->
+	<!-- 1.카페만들기 -->
+	<insert id="insertCafe" parameterType="dto">
+		INSERT INTO community
+		values(#{cafe_name},#{cafe_addr},#{cafe_nick},#{cafe_sort1},#{cafe_sort2},
+		#{cafe_keyword},#{cafe_img},sysdate,3,1)
+	</insert>
+	<!-- 2.카페 게시판 초기 자동 생성값 -->
+	<insert id="insertCafe_first" parameterType="dto2" >
+		INSERT INTO
+		cafe_board
+		values(b_no_seq.nextval,'관리자','카페생성을 축하드립니다^~^','카페생성을 축하드립니다^~^',
+		'공사중',sysdate,0,0,0,0,#{cafe_name},0)
+	</insert>
+
+	<!--카페관리자: 카페생성 후 게시판가져오기 -->
+	<select id="cafe_SelectAll" parameterType="se" resultType="dto2">
+		SELECT RN, <include refid="cafe_allcolmn" />
+		FROM(SELECT ROWNUM RN, <include refid="cafe_allcolmn" />
+		FROM (select <include refid="cafe_allcolmn" />
+		from cafe_board
+		where cafe_name = #{cafe_name}
+		ORDER BY member_count DESC)
+		WHERE ROWNUM &lt;=#{end})
+		WHERE RN &gt;=#{start}
+	</select>
+	<select id="cafe_selectAll_list" parameterType="dto" resultType="dto">
+	SELECT <include refid="com_allcolmn" />
+	FROM community
+	ORDER BY CAFE_BORN_DATE DESC
+	</select>
+	
+	<!-- 게시물번호 -->
+	<!-- <select id="countList" parameterType="dto2" resultType="int">
+	SELECT COUNT(*) cnt
+	FROM CAFE_BOARD
+	WHERE cafe_name =#{cafe_name}
+	</select> -->
+	<!-- 게시판 -->
+	<!-- 게시판출력 -->
+	<select id="cafe_SelectAll2" parameterType="dto2" resultType="dto2">
+		select <include refid="cafe_allcolmn" />
+		from cafe_board
+		where cafe_name = #{cafe_name}
+	</select>
+	<insert id="board_Insert" parameterType="dto2"  >
+		INSERT INTO cafe_board
+		values(b_no_seq.nextval,#{b_writer},#{b_title},#{b_content},'공사중',sysdate,0,0,0,0,#{cafe_name},#{cafe_b_no})
+	</insert>
+	<!-- 게시판 디테일: 게시물 상세보기 -->
+	<select id="selectOne" parameterType="int" resultType="dto2">
+	SELECT <include refid="cafe_allcolmn" />
+	FROM cafe_board
+	WHERE b_no = #{b_no}
+	</select>
+	<!-- 게시물 삭제 -->
+	<delete id="deleteOne" parameterType="int">
+	DELETE cafe_board
+	WHERE b_no = #{ b_no }
+	</delete>
+	<!-- 게시물 수정 -->
+	<update id="updateOne" parameterType="dto2"   >
+	UPDATE cafe_board 
+	SET b_writer= #{b_writer} , b_title=#{b_title} ,b_content = #{b_content}  WHERE b_no= #{b_no}
+	</update>
+	<!-- 추천하기 -->
+	<update id="rasieRecom" parameterType="int">
+	UPDATE cafe_board
+	SET b_hit = b_hit+1 
+	WHERE b_no = #{b_no}
+	</update>
+	<!-- 총게시물수 -->
+	<select id="getOneTotal" parameterType="dto2" resultType="int" >
+	SELECT COUNT(*) cnt
+	FROM CAFE_BOARD
+	WHERE cafe_name = #{cafe_name}
+	</select>
+	<select id="memberCount" parameterType="dto3" resultType="int" >
+	SELECT COUNT(*) cnt
+	FROM CAFE_Member
+	WHERE cafe_name = #{cafe_name}
+	</select>
+	<select id="com_getTotal"  resultType="int" >
+	SELECT COUNT(*) cnt
+	FROM CAFE_BOARD
+	</select>
+	<insert id="insertMember" parameterType="dto3">
+		INSERT INTO cafe_member
+		values(cafe_member_seq.nextval,#{cafe_member_nick},sysdate,1,#{cafe_name})
+	</insert>
+	<!-- 멤버수 업데이트 -->
+	<update id="updateMemberCount" parameterType="dto"  >
+	UPDATE community 
+	set member_count = #{member_count}
+	where cafe_name = #{cafe_name}
+	</update>
+</mapper>  

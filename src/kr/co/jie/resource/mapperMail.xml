@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie.Mail">
+  	<sql id="mailAllCol">
+  		MAILBOX_NO, MAILBOX_RECEIVER_NAME, MAILBOX_SENDER_NAME, MAILBOX_RECEIVER_EMAIL, MAILBOX_SENDER_EMAIL,
+  		MAILBOX_TITLE, MAILBOX_CONTENT, MAILBOX_FILE, MAILBOX_LOGTIME, JOBSEEKER_NO, COMPANY_NO
+  	</sql>
+  	
+  	<select id="showAllMail" resultType="MailDTO" parameterType="MailDTO">
+  		select <include refid="mailAllCol" />
+  		from MAILBOX
+  		where MAILBOX_RECEIVER_EMAIL = #{mailbox_receiver_email}
+  	</select>
+  	
+  	<insert id="sendMail" parameterType="MailDTO">
+  		insert into MAILBOX(MAILBOX_NO, <!-- MAILBOX_RECEIVER_NAME, --> MAILBOX_RECEIVER_EMAIL,
+  							MAILBOX_SENDER_NAME, MAILBOX_SENDER_EMAIL, 
+  							MAILBOX_TITLE, MAILBOX_CONTENT, MAILBOX_LOGTIME)
+  		values (MAILBOX_NO_SEQ.NEXTVAL, <!-- #{mailbox_receiver_name}, --> #{mailbox_receiver_email},
+  				#{mailbox_sender_name}, #{mailbox_sender_email},
+  				#{mailbox_title}, #{mailbox_content}, sysdate)
+  	</insert>
+  	
+  	<delete id="deleteMail" parameterType="int">
+  		delete from MAILBOX
+  		where MAILBOX_NO = #{mailbox_no}
+  	</delete>
+  </mapper>

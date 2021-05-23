@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie.Profile">
+  	<update id="modifyJobProfile" parameterType="jobDTO">
+  		update jobseeker<!-- (jobseeker_name, jobseeker_gender, jobseeker_bday,
+			jobseeker_tel, jobseeker_cell, jobseeker_email, jobseeker_addr,
+			jobseeker_interested, jobseeker_wanted) -->
+  		set jobseeker_name=#{jobseeker_name},jobseeker_gender=#{jobseeker_gender},jobseeker_bday=#{jobseeker_bday},
+  		jobseeker_tel=#{jobseeker_tel},jobseeker_cell=#{jobseeker_cell},jobseeker_email=#{jobseeker_email},
+  		jobseeker_addr=#{jobseeker_addr},jobseeker_interested=#{jobseeker_interested},jobseeker_wanted=#{jobseeker_wanted}
+  		where jobseeker_no=#{jobseeker_no}
+  	</update>
+  	
+  	<update id="modifyComProfile" parameterType="comDTO">
+  		update Company(company_name, company_gender, company_bday,
+			company_tel, company_cell, company_email, jobseeker_addr,
+			jobseeker_interested, jobseeker_wanted)
+  		set (#{jobseeker_name},#{jobseeker_gender},#{jobseeker_bday},#{jobseeker_tel},
+  			#{jobseeker_cell},#{jobseeker_email},#{jobseeker_addr},#{jobseeker_interested},#{jobseeker_wanted},)
+  		where jobseeker_no=#{jobseeker_no}
+  	</update>
+  </mapper>

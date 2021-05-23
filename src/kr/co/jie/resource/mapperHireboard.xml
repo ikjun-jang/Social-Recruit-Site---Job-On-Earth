@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.co.jie.hireboard">
+  	
+  	<!-- HireBoard -->
+  	<sql id="allColumn">
+  		hireboard_no,
+  		company_no, 
+  		hireboard_title, 
+  		hireboard_name, 
+  		hireboard_homepage,
+  		hireboard_sort,
+  		hireboard_job,
+  		hireboard_email,
+  		hireboard_tel,
+  		hireboard_content,
+  		hireboard_deadline,
+  		hireboard_image,
+  		hireboard_wdate,
+  		hireboard_hits
+  	</sql>
+  
+  	<!-- <select id="hireboardSelectAll" resultType="hireboardDTO">
+  	 	SELECT <include refid="allColumn" /> FROM hireboard
+  	</select> -->
+  	
+  	<!-- getTotal 부분 ( 전체 개수 알아오기 ) -->
+  	<select id="getTotal" resultType="int">
+  		select count(*) cnt from hireboard
+  	</select>
+  	
+  	<!-- 페이징 하면서 전체 불러오기 -->
+  	<select id="hireboardSelectAll" resultType="hireboardDTO" parameterType="se">
+  		select rn, <include refid="allColumn" /> 
+  		from (select rownum rn, <include refid="allColumn" /> 
+  		from (select <include refid="allColumn" /> 
+  		from hireboard order by hireboard_wdate desc) where rownum &lt;= #{end}) where rn &gt;= #{start}
+  	</select>
+  	
+  	<select id="hireboardSelectByNo" resultType="hireboardDTO" parameterType="int">
+  		SELECT <include refid="allColumn" /> FROM hireboard WHERE hireboard_no = #{hireboard_no}
+  	</select>
+  	
+  	<select id="hireboardSearchByKeyword">
+  	 	select hireboard_No, company_No, hireboard_Title, hireboard_Content, hireboard_Hits, 
+  	 	hireboard_Authority, hireboard_Job, hireboard_Deadline
+		from hireboard
+		where hireboard_Title like '%#{keyword}%'
+  	</select>
+  	
+  	<insert id="hireboardInsertOne">
+  		INSERT INTO hireboard VALUES(
+  			hireboard_no_seq.nextval,			<!-- 게시판 번호 시퀀스-->
+  			#{company_no},						<!-- 기업 번호 -->
+  			#{hireboard_title},					<!-- 게시판 제목 -->
+  			#{hireboard_name},					<!-- 기업명 -->
+  			#{hireboard_homepage},				<!-- 기업 홈페이지 -->
+  			#{hireboard_sort},					<!-- 업종 -->
+  			#{hireboard_job},					<!-- 직무 -->
+  			#{hireboard_email},					<!-- 이메일 -->
+  			#{hireboard_tel},					<!-- 전화 -->
+  			#{hireboard_content},				<!-- 공고 내용 -->
+  			#{hireboard_deadline},				<!-- 마감일 -->
+  			'9393',								<!-- 이미지경로 임시:9393 -->
+  			TO_CHAR(sysdate, 'mm, dd, YYYY, HH24:MI:SS'),	<!-- 작성 날짜 -->
+  			0									<!-- 조회수 0부터 시작 -->
+  		)
+  	</insert>
+  	
+  	<!-- 변경 -->
+  	<update id="hireboardUpdateOne" parameterType="hireboardDTO">
+  		UPDATE hireboard SET 
+  		hireboard_title = #{hireboard_title},
+  		hireboard_name = #{hireboard_name},
+  		hireboard_homepage = #{hireboard_homepage},
+  		hireboard_sort = #{hireboard_sort},
+  		hireboard_job = #{hireboard_job},
+  		hireboard_email = #{hireboard_email},
+  		hireboard_tel = #{hireboard_tel},
+  		hireboard_content = #{hireboard_content},
+  		hireboard_deadline = #{hireboard_deadline} WHERE hireboard_no = #{hireboard_no}
+  	</update>
+
+  	
+  	
+  	<!-- 성진 파트 -->
+  	<!-- 목록 삭제 -->
+ 	<delete id="hireboardDeleteOne" parameterType="int">
+  		delete from hireboard 
+  		where hireboard_no = #{hireboard_no}
+  	</delete>
+  	
+  	<!-- 페이징처리 -->
+  	<select id="selectBoard" resultType="hireboardDTO" parameterType="se">
+  		select rn, <include refid="allColumn" /> 
+  		from (select rownum rn, <include refid="allColumn" /> 
+  			from (select <include refid="allColumn" />
+  					from (select <include refid="allColumn" /> 
+  						from hireboard
+  						order by hireboard_no desc)
+  					where hireboard_no like '%'||#{keyword}||'%' or 
+  						hireboard_title like '%'||#{keyword}||'%' or
+  						hireboard_name like '%'||#{keyword}||'%' or
+  						hireboard_homepage like '%'||#{keyword}||'%' or
+  						hireboard_sort like '%'||#{keyword}||'%' or
+  						hireboard_job like '%'||#{keyword}||'%' or
+  						hireboard_email like '%'||#{keyword}||'%' or
+  						hireboard_tel like '%'||#{keyword}||'%' or
+  						hireboard_content like '%'||#{keyword}||'%' or
+  						hireboard_deadline like '%'||#{keyword}||'%')
+  			where rownum &lt;= #{end}) 
+  		where rn &gt;= #{start}
+  	</select>
+  	
+  	<!-- 전체 목록 수 -->
+  	<select id ="getTotalHireboard" resultType="int" parameterType="String">
+    	 SELECT COUNT(*) cnt
+    	 FROM hireBOARD
+    	 where hireboard_no like '%'||#{keyword}||'%' or 
+  						hireboard_title like '%'||#{keyword}||'%' or
+  						hireboard_name like '%'||#{keyword}||'%' or
+  						hireboard_homepage like '%'||#{keyword}||'%' or
+  						hireboard_sort like '%'||#{keyword}||'%' or
+  						hireboard_job like '%'||#{keyword}||'%' or
+  						hireboard_email like '%'||#{keyword}||'%' or
+  						hireboard_tel like '%'||#{keyword}||'%' or
+  						hireboard_content like '%'||#{keyword}||'%' or
+  						hireboard_deadline like '%'||#{keyword}||'%'
+    	 
+    </select >
+  	
+  	
+  	
+  </mapper>

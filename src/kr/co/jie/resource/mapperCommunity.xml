@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <!-- Community -->
+  <mapper namespace="kr.co.jie.community">
+  	<sql id="allColumn">
+  		cafe_name,
+  		cafe_addr,
+  		cafe_sort1,
+  		cafe_sort2,
+  		cafe_keyword,
+  		cafe_img,
+  		cafe_born_date,
+  		jobseeker_no
+	</sql>
+  	
+ 	<!-- 전체 선택 -->
+  	<select id="communitySelectAll" resultType="CommunityDTO">
+  	 	SELECT <include refid="allColumn" /> FROM community
+  	</select>
+  	
+  	<!-- 목록 삭제 -->
+ 	<delete id="communityDeleteOne" parameterType="String">
+  		delete from community 
+  		where cafe_name = #{cafe_name}
+  	</delete>
+  	
+  	<!-- 페이징처리 -->
+  	<select id="selectCommunity" resultType="CommunityDTO" parameterType="se">
+  		select rn, <include refid="allColumn" /> 
+  		from (select rownum rn, <include refid="allColumn" /> 
+  			from (select <include refid="allColumn" />
+  					from (select <include refid="allColumn" /> 
+  						from community
+  						order by cafe_born_date desc)
+		  				where cafe_name like '%'||#{keyword}||'%' or
+						  		cafe_addr like '%'||#{keyword}||'%' or
+						  		cafe_sort1 like '%'||#{keyword}||'%' or
+						  		cafe_sort2 like '%'||#{keyword}||'%' or
+						  		cafe_born_date like '%'||#{keyword}||'%')
+  			where rownum &lt;= #{end}) 
+  		where rn &gt;= #{start}
+  	</select>
+  	
+  	<!-- 전체 목록 수 -->
+  	<select id ="getTotal" resultType="int" parameterType="String">
+    	 SELECT COUNT(*) cnt
+    	 FROM community
+    	 where cafe_name like '%'||#{keyword}||'%' or
+		  		cafe_addr like '%'||#{keyword}||'%' or
+		  		cafe_sort1 like '%'||#{keyword}||'%' or
+		  		cafe_sort2 like '%'||#{keyword}||'%' or
+		  		cafe_born_date like '%'||#{keyword}||'%'
+	 
+    </select >
+  
+  </mapper>
